@@ -2,35 +2,68 @@ package com.algoExpert.demo.Controller;
 
 import com.algoExpert.demo.Entity.Project;
 import com.algoExpert.demo.Entity.User;
-import com.algoExpert.demo.Service.UserService;
+import com.algoExpert.demo.ExceptionHandler.InvalidArgument;
+import com.algoExpert.demo.Jwt.JwtResponse;
+import com.algoExpert.demo.Jwt.JwtService;
+import com.algoExpert.demo.Repository.Service.Impl.RefreshTokenSevice;
+import com.algoExpert.demo.Repository.Service.ProjectUserService;
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Date;
 import java.util.List;
 
 @RestController
-@CrossOrigin("*")
 @RequestMapping("/user")
 public class UserController {
+    @Autowired
+    private ProjectUserService projectUserService;
 
     @Autowired
-    private UserService userService;
+    private JwtService jwtService;
 
-//    create user
-    @PostMapping("/saveUser")
-    public User saveUser(@RequestBody User user){
-        return userService.create(user);
+    @Autowired
+    private RefreshTokenSevice refreshTokenSevice;
+
+    @GetMapping("/getSingleProject/{project_id}")
+    public Project getSingleProject(@PathVariable int project_id){
+        return projectUserService.findProject(project_id);
+    }
+  
+    @GetMapping("/fetchUserProject")
+    public List<Project> getUserProject(){
+        return projectUserService.getUserProjectIds();
     }
 
-//    get all users of the system
-    @GetMapping("/getAllUsers")
-    public List<User> getAll(){
-        return userService.getUsers();
+    @GetMapping("/refreshToken")
+    public JwtResponse refreshJwtToken(HttpServletRequest request){
+
+        Cookie[] cookies = request.getCookies();
+        Boolean checkIfExpired = true;
+        String refreshTokenRequest = null;
+
+        if (cookies != null) {
+            for (Cookie cookie : cookies) {
+                if (cookie.getName().equals("jwtToken")) {
+                    checkIfExpired = jwtService.extractExpiration(cookie.getValue()).before(new Date());
+                }
+                if(cookie.getName().equals("refreshToken")){
+                    refreshTokenRequest = cookie.getValue();
+                }
+            }
+        }
+        if(checkIfExpired){
+            // Proceed with token refresh logic if the token is expired
+            return projectUserService.refreshJwtToken(refreshTokenRequest);
+        }
+        return JwtResponse.builder().jwtToken("jwt token not expired").build();
     }
 
-    @GetMapping("/fetchUserProject/{user_id}")
-    public List<Project> getUserProject(@PathVariable int user_id){
-        return userService.getUserProjectIds(user_id);
+    @DeleteMapping("/logoutUser")
+    public Boolean logoutUser(){
+        return refreshTokenSevice.userLogout();
     }
 }

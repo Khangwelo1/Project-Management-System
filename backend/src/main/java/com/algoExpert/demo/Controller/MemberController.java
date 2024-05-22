@@ -1,11 +1,14 @@
 package com.algoExpert.demo.Controller;
 
 import com.algoExpert.demo.Entity.Member;
-import com.algoExpert.demo.Entity.Project;
-import com.algoExpert.demo.Service.MemberService;
+import com.algoExpert.demo.Entity.User;
+import com.algoExpert.demo.ExceptionHandler.InvalidArgument;
+import com.algoExpert.demo.Repository.Service.MemberService;
+import jakarta.mail.MessagingException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import java.io.IOException;
 import java.util.List;
 
 @RestController
@@ -15,19 +18,23 @@ public class MemberController {
     private MemberService memberService;
 
 //    invite member to a project
-    @PostMapping("/inviteMember/{project_id}/{user_id}")
-    public Project inviteMember(@PathVariable int project_id, @PathVariable int user_id){
-
+    @GetMapping("/inviteMember/{project_id}/{user_id}")
+    public Member inviteMember(@PathVariable int project_id, @PathVariable int user_id) throws InvalidArgument, MessagingException, IOException {
         return memberService.inviteMember(project_id,user_id);
     }
-
 //    get all members of a project
     @GetMapping("/getAllMembers")
     public List<Member> getAllMembers(){
         return memberService.getAllMembers();
     }
 
-    @GetMapping("/getMemebrId/{user_id}")
+    //search members to invite
+    @PostMapping("/searchMembers")
+    public List<User> searchMembers(@RequestParam String fullnameLetters){
+        return memberService.searchMemberToInvite(fullnameLetters);
+    }
+
+    @GetMapping("/getMemberId/{user_id}")
     public Integer getMemberId(@PathVariable int user_id ){
         return memberService.findLoginMember(user_id);
     }

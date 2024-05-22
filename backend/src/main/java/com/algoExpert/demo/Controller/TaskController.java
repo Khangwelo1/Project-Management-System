@@ -1,14 +1,16 @@
 package com.algoExpert.demo.Controller;
 
-import com.algoExpert.demo.Entity.Project;
-import com.algoExpert.demo.Entity.Table;
+import com.algoExpert.demo.AppNotification.DeadlineTaskReminder;
 import com.algoExpert.demo.Entity.Task;
-import com.algoExpert.demo.Entity.User;
 
-import com.algoExpert.demo.Service.TaskService;
+import com.algoExpert.demo.Entity.TaskContainer;
+import com.algoExpert.demo.ExceptionHandler.InvalidArgument;
+import com.algoExpert.demo.Repository.Service.TaskService;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import java.text.ParseException;
 import java.util.List;
 
 @RestController
@@ -17,42 +19,46 @@ public class TaskController {
     @Autowired
     private TaskService taskService;
 
-//  create task using table and member id
-    @PostMapping("/createTask/{member_id}/{table_id}")
-    public Table createTask(@PathVariable int member_id,@PathVariable int table_id){
-        return taskService.createTask(member_id,table_id);
+    @Autowired
+    private DeadlineTaskReminder taskReminder;
+
+    //  create task using table and member id
+    @PostMapping("/createTask/{table_id}")
+    public TaskContainer createTask( @PathVariable int table_id) throws InvalidArgument {
+        return taskService.createTask(table_id);
     }
 
-//    get all tasks
+    //    get all tasks
     @GetMapping("/getAllTask")
-    public List<Task> getAllTask(){
+    public List<Task> getAllTask() {
         return taskService.getAllTask();
+    }
+
+    @PutMapping("/editTask")
+    public Task editTask(@RequestBody Task taskDto) throws InvalidArgument {
+        return taskService.editTask(taskDto);
+    }
+
+    // duplicate task by id
+    @PostMapping("/duplicateTask/{table_id}")
+    public TaskContainer taskUpdate(@PathVariable Integer table_id, @RequestBody Task task) {
+        return taskService.duplicateTask(task, table_id);
     }
 
     //delete task
     @DeleteMapping("/deleteTaskById/{task_id}/{table_id}")
-    public Table deleteTaskById(@PathVariable Integer task_id, @PathVariable Integer table_id){
-       return  taskService.deleteTaskById(task_id,table_id);
+    public TaskContainer deleteTaskById(@PathVariable Integer task_id, @PathVariable Integer table_id) throws InvalidArgument {
+        return taskService.deleteTaskById(task_id, table_id);
     }
 
-    @PutMapping("/editTask/{task_id}")
-    public Task editTask(@RequestBody Task task, @PathVariable Integer task_id){
-        return  taskService.editTask(task,task_id);
+    @GetMapping("/taskInvitation")
+    public Task getAllTaskById(@RequestParam("taskId") int taskId) {
+        return taskService.getTaskById(taskId);
     }
 
-    @PostMapping("/duplicateTask/{table_id}")
-    public Table taskUpdate(@PathVariable Integer table_id,@RequestBody Task task){
-        return taskService.duplicateTask(task,table_id);
+    @GetMapping("/taskDueDate")
+    public Task taskDueDate(@RequestParam("taskId") int taskId) {
+        return taskService.getTaskById(taskId);
     }
-
-
-
-
-
-//    @PostMapping("/duplicateTask/{task_id}/{table_id}")
-//    public Task duplicateTask(@PathVariable int task_id,@PathVariable int table_id){
-//        return taskService.duplicateTask(task_id,table_id);
-//    }
-
 
 }

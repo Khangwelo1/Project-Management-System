@@ -1,8 +1,14 @@
 package com.algoExpert.demo.Entity;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotBlank;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
 @Entity
 public class Comment {
 
@@ -13,52 +19,7 @@ public class Comment {
     private String date_created;
 
     @Column(length = 1000)
-    private String comment;
-
-
-//    constructors
-
-    public Comment() {
-    }
-
-    public Comment(int comment_id, String username, String date_created, String comment) {
-        this.comment_id = comment_id;
-        this.username = username;
-        this.date_created = date_created;
-        this.comment = comment;
-    }
-
-    public int getComment_id() {
-        return this.comment_id;
-    }
-
-    public void setComment_id(int comment_id) {
-        this.comment_id = comment_id;
-    }
-
-    public String getUsername() {
-        return this.username;
-    }
-
-    public void setUsername(String username) {
-        this.username = username;
-    }
-
-    public String getDate_created() {
-        return this.date_created;
-    }
-
-    public void setDate_created(String date_created) {
-        this.date_created = date_created;
-    }
-
-    public String getComment() {
-        return this.comment;
-    }
-
-    public void setComment(String comment) {
-        this.comment = comment;
-    }
-
+    @NotBlank(message = "comment is required")
+    private String commentBody;
 
 }
