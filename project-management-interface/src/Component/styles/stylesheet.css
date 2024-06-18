@@ -22,6 +22,8 @@
 @import url("SettingsPage_Style.css");
 @import url("Notification_Style.css");
 @import url("Feedback_Style.css");
+@import url("Model.css");
+@import url("ModelLoginFailed.css");
 
 
 :root{
