@@ -6,6 +6,8 @@ import { useForm } from "react-hook-form";
 import { jwtDecode } from "jwt-decode";
 import Cookies from "js-cookie";
 import { loginUserDetails } from "./LoginUserDetails";
+import Model from "./Model";
+import ModelLoginFailed from "./ModelLoginFailed";
 
 function Login() {
 
@@ -13,6 +15,7 @@ function Login() {
     const [emailMessage, setemailMessage] = useState("none");
     const [passwordMessage, setpasswordMessage] = useState("none");
     const [badCredentials, setBadCredentials] = useState("");
+    const [showModal, setShowModal] = useState(false);
 
 
   const { register, handleSubmit, setValue } = useForm({
@@ -39,6 +42,7 @@ function Login() {
                 else {
                     setBadCredentials(response.data.message)
                     console.log(response.data.status)
+                    setShowModal(true);
                 }
                 } catch (error) {
                 console.error("Error logging in: ", error);
@@ -70,6 +74,11 @@ function Login() {
         sessionStorage.setItem("sentEmail", "requestedEmail");
         window.location.href = "/privacy";
     }
+    const [visible, setVisible] = useState(false);
+    const toggleVisibility = (e) => {
+      e.preventDefault(); // Prevent form submission
+      setVisible((prev) => !prev);
+    };
 
     return (
       <>
@@ -86,11 +95,13 @@ function Login() {
                                 <h5 >Please Login</h5>
                                 <p>Thank you for choosing us, if registered please login</p>
                             </div>
-                            {
+                            {/* {
                                 showRegister == "none" ? 
-                                    <span className='logintoogleText' onClick={() => setShowRegister("block")}>Register on this page</span> :
+                                    <span className='logintoogleText' onClick={() => setShowRegister("block")}>Register on this page</span>
+                                   :
                                     <span className='logintoogleText' onClick={() => setShowRegister("none")}> Login on this page</span>
-                            }
+                                    
+                            } */}
                             <form action="" onSubmit={handleSubmit(login)} >
                               <div style={{display:showRegister}}>
                                 <h6>Full name</h6>
@@ -98,21 +109,64 @@ function Login() {
                               </div>
                               <h6>Email</h6>
                                 <input {...register("email",{required:"please enter email"})} type="text" id='email' name="email"  placeholder='email' />
-                               <h6>Password</h6>
+                               
+                               
+                               
+                               {/* <h6>Password</h6>
                                 <input  {...register("password", { required: "please enter password" })} id='password' type="text" name="password" placeholder='password' />
                                 <p style={{ display: showRegister == "none" && badCredentials ? "block" : "none" }}>{badCredentials}</p>
                                 <a href='' onClick={e =>passwordChange(e)} style={{display:showRegister == "none" ?"block" :"none"}}  id='forgot_password'>Forgot Password ?</a>
+                               */}
+
+
+                               <h6>Password</h6>
+                              <div className="Password_Holder">
+                              <input
+                              {...register('password', {
+                              required: 'Please enter password',
+                              })}
+                              id="password"
+                              type={visible ? 'text' : 'password'}
+                              name="password"
+                              placeholder="Password"
+                              />
+                              <span className="material-symbols-outlined" onClick={toggleVisibility}>
+                              {visible ? <i className="lni lni-eye"></i> : <i className="lni lni-eye"></i> }
+                              </span>
+                              </div>
+                               
                                <div style={{display:showRegister}}>
                                     <h6>Re-enter password</h6>
                                     <p style={{display:passwordMessage}} id="wrong_password">Attention: Passwords do not match, please ensure they match to proceed</p>
                                     <input {...register("re_password", { required: showRegister == "block" ? true : false })} name='re_password' id='password' type="text" placeholder='password' />
                                 </div>
-                                {
+                                {/* {
                                     showRegister == "block" ? <button type='submit'>Register</button> :
                                     <button  type='submit'>Login</button>
-                                }
+                                } */}
+                                
+                                {showRegister == "block" ? (
+                                <div>
+                                <button type="submit">Register</button>
+                                <button onClick={() => setShowRegister("none")}>Login</button>
+                                </div>
+
+                                ) : (
+                                <div className="Login_Button_Holder">
+                                <button type="submit">Login</button>
+                                <button onClick={() => setShowRegister("block")}>Register</button>
+                                </div>
+                                )}
                             </form>
-                            <h6 style={{display:emailMessage}} id='confirm_message'>Thank you for registering please confirm via email before logging in </h6>
+
+
+                            <div className="Register_Display">
+              <h6 style={{ display: emailMessage }} id="confirm_message">
+              <Model />
+              </h6>
+              </div>
+
+
                             <div className="third_party_login">
                                 <p id=''>Login with other sites</p>
                                 <div className='third_party_links'>
@@ -143,6 +197,7 @@ function Login() {
           </div>
         </div>
       </div>
+      {showModal && <ModelLoginFailed onClose={undefined} />}
     </>
   );
 }
