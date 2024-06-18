@@ -77,7 +77,7 @@ function Home() {
                                   }
                                   
                               </div>
-                              <a href='' id='home_btn'><i className="lni lni-circle-plus"></i> Add projects</a>
+                              <a href='/createproject' id='home_btn'><i className="lni lni-circle-plus"></i> Add projects</a>
                           </div>
                       </div>  
                 </div>
